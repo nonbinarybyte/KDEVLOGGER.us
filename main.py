@@ -5,32 +5,35 @@ import os
 from datetime import datetime
 
 github_username = "nonbinarybyte"
-github_repo = "Server25-OS"
 consumer_key = os.environ['CONSUMER_KEY']
 consumer_secret = os.environ['CONSUMER_SECRET']
 access_token = os.environ['ACCESS_TOKEN']
 access_token_secret = os.environ['ACCESS_TOKEN_SECRET']
 
 def get_recent_commits():
-    url = f"https://api.github.com/users/nonbinarybyte/events/public"
-    response = requests.get(url)
+    repos_url = f"https://api.github.com/users/{github_username}/repos"
+    repos_response = requests.get(repos_url)
     commits = []
     
-    if response.status_code == 200:
-        events = response.json()
-        for event in events:
-            if event["type"] == "PushEvent":
-                for commit in event["payload"]["commits"]:
-                    message = commit["message"]
-                    commit_url = f"https://github.com/{github_username}/{github_repo}/commit/{commit['sha']}"
-                    commits.append(f"- {message} ({commit_url})")
-                break
+    if repos_response.status_code == 200:
+        repos = repos_response.json()
+        for repo in repos:
+            repo_name = repo["name"]
+            commits_url = f"https://api.github.com/repos/{github_username}/{repo_name}/commits"
+            commits_response = requests.get(commits_url)
+            
+            if commits_response.status_code == 200:
+                repo_commits = commits_response.json()
+                for commit in repo_commits[:3]:  # Get latest 3 commits per repo
+                    message = commit["commit"]["message"]
+                    commit_url = commit["html_url"]
+                    commits.append(f"[{repo_name}] {message} ({commit_url})")
     
-    return "\n".join(commits[:3]) if commits else "No recent commits."
+    return "\n".join(commits[:5]) if commits else "No recent commits."
 
 def tweet_update(api):
-    image_path = os.path.join("ASSETS/IMG.jpg")
-    status_text = f"Latest GitHub commits:\n{get_recent_commits()}\nMore at: https://github.com/{github_username} #devlog #indiedev #coding #developer #dev"
+    image_path = os.path.join("ASSETS/IMG.jpeg")
+    status_text = f"Latest GitHub commits:\n{get_recent_commits()}\nMore at: https://github.com/{github_username}"
     
     try:
         api.update_status_with_media(status=status_text, filename=image_path)
