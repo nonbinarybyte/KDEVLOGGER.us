@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 
 github_username = "nonbinarybyte"
-github_repo = "Server25-OS", "nonbinarybyte.com", "tkc.org", "KDEVLOGGER.us"
+github_repo = "Server25-OS"
 consumer_key = os.environ['CONSUMER_KEY']
 consumer_secret = os.environ['CONSUMER_SECRET']
 access_token = os.environ['ACCESS_TOKEN']
